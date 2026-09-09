@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiTe_me | Real-Time Voice Impersonation Detection Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="logo-pulse"></div>
+            <div class="brand-text">
+                <h1>BiTe_me <span class="badge">SEC-OPS</span></h1>
+                <p>AI-Powered Real-Time Voice Impersonation & Executive Deepfake Defense</p>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-pill">
+                <span class="label">DECISION SLA</span>
+                <span class="val green">&lt; 300 ms</span>
+            </div>
+            <div class="stat-pill">
+                <span class="label">PRIVACY MODE</span>
+                <span class="val cyan">ZERO-DISK RAM</span>
+            </div>
+            <div class="stat-pill">
+                <span class="label">LEDGER INTEGRITY</span>
+                <span class="val green" id="ledgerStatusBadge">SHA-256 VALID</span>
+            </div>
+            <div class="stat-pill">
+                <span class="label">SPEAKER BIOMETRICS</span>
+                <span class="val purple">NON-INVERTIBLE</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-grid">
+        <!-- Left: Threat Status & Dynamic Policy State -->
+        <section class="card policy-card">
+            <div class="card-header">
+                <h2>Live Call Policy State</h2>
+                <span class="call-id-tag" id="currentCallId">ID: CALL-MIRROR-8842</span>
+            </div>
+            
+            <div class="policy-state-banner state-normal" id="policyStateBanner">
+                <div class="state-icon" id="stateIcon">🛡️</div>
+                <div class="state-info">
+                    <h3 id="policyStateTitle">NORMAL</h3>
+                    <p id="policyActionDesc">Pass-through authorized. Continuous acoustic monitoring active.</p>
+                </div>
+            </div>
+
+            <!-- Risk Score Gauge -->
+            <div class="gauge-container">
+                <div class="gauge-dial">
+                    <svg viewBox="0 0 200 110" class="gauge-svg">
+                        <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="18" stroke-linecap="round"/>
+                        <path class="gauge-progress" id="gaugeProgress" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#10b981" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                    </svg>
+                    <div class="gauge-center">
+                        <span class="risk-number" id="riskNumber">0</span>
+                        <span class="risk-label">DYNAMIC RISK</span>
+                    </div>
+                </div>
+                <div class="gauge-ticks">
+                    <span>0 (PASS)</span>
+                    <span>30 (MON)</span>
+                    <span>60 (WARN)</span>
+                    <span>75 (MFA)</span>
+                    <span>100 (HOLD)</span>
+                </div>
+            </div>
+
+            <!-- Threat Triggers / Reasons -->
+            <div class="threat-reasons-box">
+                <h4>Active Detection Flags:</h4>
+                <ul id="threatReasonsList" class="reasons-list">
+                    <li class="empty">No acoustic or biometric anomalies detected.</li>
+                </ul>
+            </div>
+
+            <!-- Graduated Action Controls -->
+            <div class="controls-overview">
+                <h4>Graduated Defense Tier:</h4>
+                <div class="tier-steps">
+                    <div class="tier-step active" id="tierNormal">
+                        <span class="step-badge">1</span>
+                        <span>Pass</span>
+                    </div>
+                    <div class="tier-step" id="tierMonitor">
+                        <span class="step-badge">2</span>
+                        <span>Monitor</span>
+                    </div>
+                    <div class="tier-step" id="tierWarn">
+                        <span class="step-badge">3</span>
+                        <span>Warn</span>
+                    </div>
+                    <div class="tier-step" id="tierMfa">
+                        <span class="step-badge">4</span>
+                        <span>Step-up MFA</span>
+                    </div>
+                    <div class="tier-step" id="tierHold">
+                        <span class="step-badge">5</span>
+                        <span>SIP Hold/Block</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center: Waveform, Spectrogram & Latency SLA Breakdown -->
+        <section class="card audio-card">
+            <div class="card-header">
+                <h2>Streaming Media Gateway (16 kHz PCM)</h2>
+                <div class="stream-controls">
+                    <button class="btn btn-sm" id="btnMic">🎙️ Live Mic</button>
+                    <button class="btn btn-sm btn-primary" id="btnSimCeo">👤 Legitimate CEO</button>
+                    <button class="btn btn-sm btn-danger" id="btnSimDeepfake">🤖 AI Vocoder Clone</button>
+                    <button class="btn btn-sm btn-warning" id="btnSimReplay">📻 Replay Attack</button>
+                    <button class="btn btn-sm" id="btnStopStream">⏹️ Stop</button>
+                </div>
+            </div>
+
+            <!-- Canvas Visualizers -->
+            <div class="visualizer-wrapper">
+                <div class="canvas-box">
+                    <span class="canvas-label">PCM AUDIO WAVEFORM (IN-MEMORY RING BUFFER)</span>
+                    <canvas id="waveformCanvas" width="600" height="110"></canvas>
+                </div>
+                <div class="canvas-box">
+                    <span class="canvas-label">SPECTRAL VOCODER ANOMALY HEATMAP</span>
+                    <canvas id="spectrogramCanvas" width="600" height="110"></canvas>
+                </div>
+            </div>
+
+            <!-- Sub-300ms Latency Budget Breakdown -->
+            <div class="latency-budget-panel">
+                <div class="latency-header">
+                    <h3>Decision Latency Budget</h3>
+                    <div class="total-latency" id="totalLatencyBadge">Total: <span id="totalLatencyVal">14.2</span> ms (Budget: 300 ms)</div>
+                </div>
+                <div class="latency-bars">
+                    <div class="latency-bar-row">
+                        <span class="bar-title">DSP Gate &amp; VAD (<span id="dspLatVal">2.1</span> ms)</span>
+                        <div class="bar-track"><div class="bar-fill blue" id="dspLatBar" style="width: 5%"></div></div>
+                    </div>
+                    <div class="latency-bar-row">
+                        <span class="bar-title">ONNX Anti-Spoof Ensemble (<span id="spoofLatVal">10.4</span> ms)</span>
+                        <div class="bar-track"><div class="bar-fill purple" id="spoofLatBar" style="width: 25%"></div></div>
+                    </div>
+                    <div class="latency-bar-row">
+                        <span class="bar-title">Non-Invertible Speaker Verify (<span id="speakerLatVal">1.2</span> ms)</span>
+                        <div class="bar-track"><div class="bar-fill cyan" id="speakerLatBar" style="width: 3%"></div></div>
+                    </div>
+                    <div class="latency-bar-row">
+                        <span class="bar-title">Policy &amp; Decision Smoothing (<span id="policyLatVal">0.5</span> ms)</span>
+                        <div class="bar-track"><div class="bar-fill green" id="policyLatBar" style="width: 2%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Multi-Modal Detection & n8n / Audit Inspection -->
+        <section class="card inspect-card">
+            <div class="card-header">
+                <h2>Multi-Modal Telemetry</h2>
+                <button class="btn btn-sm" id="btnVerifyChain">Verify SHA-256 Ledger</button>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="m-label">AASIST Spoof Probability</span>
+                    <span class="m-value" id="spoofProbVal">0.02</span>
+                    <div class="meter-bar"><div class="meter-fill red" id="spoofProbBar" style="width: 2%"></div></div>
+                </div>
+                <div class="metric-box">
+                    <span class="m-label">Speaker Non-Invertible Match</span>
+                    <span class="m-value" id="speakerMatchVal">94.8%</span>
+                    <div class="meter-bar"><div class="meter-fill green" id="speakerMatchBar" style="width: 95%"></div></div>
+                </div>
+                <div class="metric-box">
+                    <span class="m-label">DSP Spectral Flatness</span>
+                    <span class="m-value" id="flatnessVal">0.12</span>
+                    <div class="meter-bar"><div class="meter-fill cyan" id="flatnessBar" style="width: 20%"></div></div>
+                </div>
+                <div class="metric-box">
+                    <span class="m-label">High-Freq Power Ratio (&gt;4kHz)</span>
+                    <span class="m-value" id="highFreqVal">0.08</span>
+                    <div class="meter-bar"><div class="meter-fill yellow" id="highFreqBar" style="width: 15%"></div></div>
+                </div>
+            </div>
+
+            <!-- Signed n8n Webhook Outbox -->
+            <div class="integration-box">
+                <div class="sub-header">
+                    <h4>Internal Signed n8n Webhook Dispatch</h4>
+                    <span class="tag-signed">HMAC-SHA256</span>
+                </div>
+                <div class="webhook-snippet">
+                    <pre><code id="webhookSnippet">{
+  "status": "Awaiting graduated trigger...",
+  "privacy": "Zero raw audio transmitted"
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Tamper-Evident Hash-Chained Audit Ledger -->
+            <div class="ledger-box">
+                <div class="sub-header">
+                    <h4>Tamper-Evident SHA-256 Audit Ledger</h4>
+                    <span class="block-count" id="blockCountVal">Blocks: 1</span>
+                </div>
+                <div class="ledger-stream" id="ledgerStream">
+                    <!-- Blocks injected dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div>BiTe_me v1.0.0 &bull; Enterprise PBX / SIP Trunk Hook &bull; Sub-300ms SLA &bull; Non-Invertible Voice Hash Biometrics</div>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
