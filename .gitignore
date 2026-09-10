@@ -47,6 +47,14 @@ share/python-wheels/
 recordings/
 temp_audio/
 
+# Model checkpoints & large binary weights (>100MB)
+*.onnx
+*.pt
+*.bin
+*.safetensors
+models/*
+!models/.gitkeep
+
 # Logs & temporary files
 *.log
 scratch/

@@ -48,6 +48,11 @@ class N8NDispatcherSettings(BaseModel):
     dispatch_timeout_sec: float = 0.25  # Sub-250ms cold path dispatch SLA
     enabled: bool = True
 
+class AntiSpoofSettings(BaseModel):
+    backend: str = os.getenv("ANTI_SPOOF_BACKEND", "legacy")  # "huggingface" or "legacy"
+    model_name: str = os.getenv("ANTI_SPOOF_MODEL_NAME", "Gustking/wav2vec2-large-xlsr-deepfake-audio-classification")
+    spoof_threshold: float = 0.50
+
 class AppConfig(BaseModel):
     app_name: str = "BiTe_me: Real-Time Voice Impersonation Detection Engine"
     version: str = "1.0.0"
@@ -58,8 +63,13 @@ class AppConfig(BaseModel):
 
     audio: AudioSettings = Field(default_factory=AudioSettings)
     dsp: DSPGateSettings = Field(default_factory=DSPGateSettings)
+    anti_spoof: AntiSpoofSettings = Field(default_factory=AntiSpoofSettings)
     speaker: NonInvertibleSpeakerSettings = Field(default_factory=NonInvertibleSpeakerSettings)
     policy: PolicySettings = Field(default_factory=PolicySettings)
     n8n: N8NDispatcherSettings = Field(default_factory=N8NDispatcherSettings)
+
+    @property
+    def anti_spoof_backend(self) -> str:
+        return self.anti_spoof.backend
 
 config = AppConfig()

@@ -154,6 +154,14 @@ async def mock_n8n_endpoint(request: Request):
 async def get_mock_webhooks():
     return {"count": len(mock_received_webhooks), "items": mock_received_webhooks[-10:]}
 
+@app.post("/api/speaker/enroll-session/{call_id}")
+async def enroll_speaker_session(call_id: str, speaker_id: str = "CEO_EXEC_01"):
+    """Dynamically enrolls the speaker using live speech currently in the call's buffer."""
+    success = media_gateway.enroll_speaker_from_buffer(call_id=call_id, speaker_id=speaker_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Insufficient speech in session buffer. Please speak clearly for at least 1-2 seconds.")
+    return {"status": "ENROLLED", "call_id": call_id, "speaker_id": speaker_id}
+
 # Audio Streaming WebSocket Gateway
 @app.websocket("/ws/audio/stream/{call_id}")
 async def websocket_audio_stream(websocket: WebSocket, call_id: str):
@@ -172,3 +180,10 @@ if os.path.exists(static_dir):
     @app.get("/")
     async def serve_index():
         return FileResponse(os.path.join(static_dir, "index.html"))
+
+    @app.get("/softphone")
+    async def serve_softphone():
+        softphone_path = os.path.join(static_dir, "softphone_capture.html")
+        if os.path.exists(softphone_path):
+            return FileResponse(softphone_path)
+        raise HTTPException(status_code=404, detail="softphone_capture.html not found")

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiTe_me | Live Softphone Ingestion Client</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .softphone-container {
+            max-width: 1200px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .softphone-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Phone Control Card */
+        .phone-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .phone-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 1rem;
+        }
+
+        .phone-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-idle { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid #475569; }
+        .status-connected { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #059669; }
+        .status-calling { background: rgba(6, 182, 212, 0.2); color: #06b6d4; border: 1px solid #0891b2; }
+        .status-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #dc2626; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-input {
+            background: #090e1a;
+            border: 1px solid var(--border-card);
+            border-radius: 6px;
+            padding: 0.65rem 0.85rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            border-color: var(--color-cyan);
+        }
+
+        .call-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-call {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        .btn-call:disabled {
+            background: #334155;
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-hangup {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-hangup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        .btn-hangup:disabled {
+            background: #334155;
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-mute {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+        .btn-mute.active {
+            background: #f59e0b;
+            color: #000;
+            border-color: #d97706;
+        }
+
+        /* Live VU Meter */
+        .vu-container {
+            background: #080d1a;
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .vu-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .vu-track {
+            width: 100%;
+            height: 14px;
+            background: #131d33;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .vu-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #06b6d4 60%, #f59e0b 85%, #ef4444 100%);
+            border-radius: 4px;
+            transition: width 0.05s ease-out;
+        }
+
+        .spec-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-card);
+            padding-top: 0.75rem;
+        }
+
+        /* Right Panel: Threat HUD & Live Telemetry */
+        .display-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .hud-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .hud-value-big {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            line-height: 1.2;
+        }
+
+        .state-pill {
+            display: inline-block;
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+            width: fit-content;
+        }
+        .state-normal { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #059669; }
+        .state-monitor { background: rgba(6, 182, 212, 0.2); color: #06b6d4; border: 1px solid #0891b2; }
+        .state-warn { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #d97706; }
+        .state-mfa { background: rgba(249, 115, 22, 0.2); color: #f97316; border: 1px solid #ea580c; }
+        .state-hold { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #dc2626; animation: pulseGlow 1.5s infinite; }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.7); }
+        }
+
+        .evidence-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .evidence-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            min-height: 32px;
+            align-items: center;
+        }
+
+        .evidence-tag {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        .evidence-tag.anomaly {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* Telemetry Log Terminal */
+        .log-card {
+            background: #070c18;
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .log-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-mini {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-mini:hover {
+            color: var(--text-primary);
+            border-color: var(--color-cyan);
+        }
+
+        .log-terminal {
+            height: 240px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding-right: 0.5rem;
+        }
+
+        .log-entry {
+            line-height: 1.4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.5);
+            display: flex;
+            gap: 0.75rem;
+        }
+        .log-time { color: var(--text-muted); }
+        .log-state-NORMAL { color: #10b981; }
+        .log-state-MONITOR { color: #06b6d4; }
+        .log-state-WARN_ANALYST { color: #f59e0b; }
+        .log-state-STEP_UP_MFA { color: #f97316; }
+        .log-state-ACTIVE_HOLD { color: #ef4444; font-weight: bold; }
+        .log-silent { color: #64748b; }
+
+        .nav-link {
+            color: var(--color-cyan);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.05);
+            transition: all 0.2s;
+        }
+        .nav-link:hover {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: var(--color-cyan);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="brand">
+            <div class="logo-pulse"></div>
+            <div>
+                <h1 style="font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;">BiTe_me <span style="font-size: 0.75rem; font-weight: 500; color: var(--color-cyan); border: 1px solid rgba(6,182,212,0.3); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">SOFTPHONE</span></h1>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Real-Time Microphone Ingestion &bull; 16 kHz Mono &bull; 50 ms Raw PCM16 Streaming</p>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/" class="nav-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                SecOps Console
+            </a>
+            <div class="telemetry-badge">
+                <span class="pulse-dot"></span>
+                <span>GATEWAY PORT: 8000</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="softphone-container">
+
+        <!-- Left Column: Softphone Control Pad -->
+        <div class="phone-card">
+            <div class="phone-header">
+                <div class="phone-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Call Session Control
+                </div>
+                <span id="callStatusBadge" class="status-badge status-idle">DISCONNECTED</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="inputCallId">Call Session ID</label>
+                <input type="text" id="inputCallId" class="form-input" value="call_browser_demo_01" spellcheck="false">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="inputSpeakerId">Target Speaker Profile</label>
+                <input type="text" id="inputSpeakerId" class="form-input" value="CEO_EXEC_01" readonly style="opacity: 0.7;">
+            </div>
+
+            <!-- Call Actions -->
+            <div class="call-controls">
+                <button id="btnStartCall" class="btn-call">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Connect Microphone & Call
+                </button>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <button id="btnMute" class="btn-mute" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        <span id="muteLabel">Mute</span>
+                    </button>
+                    <button id="btnHangup" class="btn-hangup" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                        Hang Up
+                    </button>
+                </div>
+                <button id="btnEnrollVoice" class="btn-mute" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe; font-weight: 700; padding: 0.75rem;" disabled>
+                    🎙️ Enroll Live Voice as CEO
+                </button>
+            </div>
+
+            <!-- Live VU Meter -->
+            <div class="vu-container">
+                <div class="vu-labels">
+                    <span>MIC INPUT LEVEL</span>
+                    <span id="lblAudioDb">-inf dB</span>
+                </div>
+                <div class="vu-track">
+                    <div id="vuBar" class="vu-bar"></div>
+                </div>
+                <div class="spec-stats">
+                    <div>Frame: <strong style="color: #38bdf8;">50ms / 800 spl</strong></div>
+                    <div>Format: <strong style="color: #38bdf8;">16kHz PCM16</strong></div>
+                    <div>Sent: <strong id="lblFramesSent" style="color: var(--text-primary);">0 frames</strong></div>
+                    <div>Duration: <strong id="lblCallDuration" style="color: var(--text-primary);">00:00</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Threat HUD & Live Telemetry -->
+        <div class="display-panel">
+
+            <!-- Primary Metrics HUD -->
+            <div class="hud-grid">
+                <div class="hud-card">
+                    <span class="hud-title">Real-Time Risk Score</span>
+                    <div id="valRiskScore" class="hud-value-big" style="color: #10b981;">0.0</div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Calibrated Multi-Modal Risk (0 - 100)</span>
+                </div>
+
+                <div class="hud-card">
+                    <span class="hud-title">Policy State</span>
+                    <div>
+                        <span id="badgePolicyState" class="state-pill state-normal">NORMAL</span>
+                    </div>
+                    <span id="lblPolicyAction" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Action: ALLOW</span>
+                </div>
+
+                <div class="hud-card">
+                    <span class="hud-title">Decision Latency</span>
+                    <div id="valLatency" class="hud-value-big" style="color: #38bdf8;">0.0 ms</div>
+                    <span style="font-size: 0.75rem; color: #10b981;">Target Budget: &lt; 300 ms SLA</span>
+                </div>
+            </div>
+
+            <!-- Evidence Labels Card -->
+            <div class="evidence-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="hud-title">Acoustic Evidence & Anomaly Indicators</span>
+                    <span id="lblSpeakerMatch" style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">Biometric: Initializing...</span>
+                </div>
+                <div id="evidenceTags" class="evidence-tags">
+                    <span class="evidence-tag">Awaiting audio stream...</span>
+                </div>
+            </div>
+
+            <!-- Telemetry Logs Card -->
+            <div class="log-card">
+                <div class="log-header">
+                    <span class="log-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        WebSocket Live Telemetry Stream
+                    </span>
+                    <div class="log-controls">
+                        <button id="btnClearLogs" class="btn-mini">Clear</button>
+                    </div>
+                </div>
+                <div id="logTerminal" class="log-terminal">
+                    <div class="log-entry log-silent">
+                        <span class="log-time">[--:--:--]</span>
+                        <span>Softphone client initialized. Ready to initiate live audio stream.</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Client Logic -->
+    <script>
+        // State
+        let ws = null;
+        let audioCtx = null;
+        let micStream = null;
+        let micSource = null;
+        let scriptProcessor = null;
+        let isMuted = false;
+        let isCalling = false;
+        let callTimer = null;
+        let callSeconds = 0;
+        let framesSent = 0;
+
+        // Audio Accumulation Buffer for strict 50ms (800 samples) framing
+        const TARGET_SAMPLE_RATE = 16000;
+        const TARGET_FRAME_SAMPLES = 800; // 50ms @ 16kHz
+        let pcmAccumulationBuffer = [];
+
+        // DOM Elements
+        const inputCallId = document.getElementById("inputCallId");
+        const btnStartCall = document.getElementById("btnStartCall");
+        const btnHangup = document.getElementById("btnHangup");
+        const btnMute = document.getElementById("btnMute");
+        const btnEnrollVoice = document.getElementById("btnEnrollVoice");
+        const muteLabel = document.getElementById("muteLabel");
+        const callStatusBadge = document.getElementById("callStatusBadge");
+        const vuBar = document.getElementById("vuBar");
+        const lblAudioDb = document.getElementById("lblAudioDb");
+        const lblFramesSent = document.getElementById("lblFramesSent");
+        const lblCallDuration = document.getElementById("lblCallDuration");
+        const valRiskScore = document.getElementById("valRiskScore");
+        const badgePolicyState = document.getElementById("badgePolicyState");
+        const lblPolicyAction = document.getElementById("lblPolicyAction");
+        const valLatency = document.getElementById("valLatency");
+        const lblSpeakerMatch = document.getElementById("lblSpeakerMatch");
+        const evidenceTags = document.getElementById("evidenceTags");
+        const logTerminal = document.getElementById("logTerminal");
+        const btnClearLogs = document.getElementById("btnClearLogs");
+
+        // Format duration mm:ss
+        function formatDuration(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, "0");
+            const s = (sec % 60).toString().padStart(2, "0");
+            return `${m}:${s}`;
+        }
+
+        // Linear interpolation downsampler / upsampler to exact 16000 Hz
+        function resampleTo16k(inputBuffer, inputSampleRate) {
+            if (inputSampleRate === TARGET_SAMPLE_RATE) {
+                return inputBuffer;
+            }
+            const ratio = inputSampleRate / TARGET_SAMPLE_RATE;
+            const newLength = Math.round(inputBuffer.length / ratio);
+            const result = new Float32Array(newLength);
+            for (let i = 0; i < newLength; i++) {
+                const originIndex = i * ratio;
+                const indexFloor = Math.floor(originIndex);
+                const indexCeil = Math.min(inputBuffer.length - 1, indexFloor + 1);
+                const interpolation = originIndex - indexFloor;
+                result[i] = inputBuffer[indexFloor] * (1 - interpolation) + inputBuffer[indexCeil] * interpolation;
+            }
+            return result;
+        }
+
+        // Append log line
+        function appendLog(text, stateClass = "") {
+            const now = new Date().toTimeString().split(" ")[0];
+            const div = document.createElement("div");
+            div.className = "log-entry " + stateClass;
+            div.innerHTML = `<span class="log-time">[${now}]</span> <span>${text}</span>`;
+            logTerminal.appendChild(div);
+            logTerminal.scrollTop = logTerminal.scrollHeight;
+        }
+
+        // Start Call
+        async function startCall() {
+            const callId = inputCallId.value.trim() || `call_browser_${Date.now()}`;
+            inputCallId.value = callId;
+
+            // 1. Request Microphone Access
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: false,
+                        autoGainControl: true
+                    }
+                });
+            } catch (err) {
+                alert("Microphone permission denied: " + err.message);
+                return;
+            }
+
+            // Update UI
+            callStatusBadge.className = "status-badge status-calling";
+            callStatusBadge.innerText = "CONNECTING...";
+            btnStartCall.disabled = true;
+            inputCallId.disabled = true;
+
+            // 2. Connect WebSocket
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const wsUrl = `${protocol}//${window.location.host}/ws/audio/stream/${encodeURIComponent(callId)}`;
+
+            ws = new WebSocket(wsUrl);
+            ws.binaryType = "arraybuffer";
+
+            ws.onopen = () => {
+                callStatusBadge.className = "status-badge status-connected";
+                callStatusBadge.innerText = "IN CALL (STREAMING)";
+                btnHangup.disabled = false;
+                btnMute.disabled = false;
+                btnEnrollVoice.disabled = false;
+                isCalling = true;
+                framesSent = 0;
+                callSeconds = 0;
+                callTimer = setInterval(() => {
+                    callSeconds++;
+                    lblCallDuration.innerText = formatDuration(callSeconds);
+                }, 1000);
+
+                appendLog(`Connected to Media Gateway at /ws/audio/stream/${callId}`, "log-state-NORMAL");
+                setupAudioProcessing();
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleTelemetry(data);
+                } catch (err) {
+                    console.error("Telemetry parse error:", err);
+                }
+            };
+
+            ws.onclose = () => {
+                appendLog("WebSocket connection closed.", "log-silent");
+                endCall();
+            };
+
+            ws.onerror = (err) => {
+                console.error("WebSocket error:", err);
+                appendLog("WebSocket error encountered.", "log-state-ACTIVE_HOLD");
+            };
+        }
+
+        // Setup Web Audio graph
+        function setupAudioProcessing() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            micSource = audioCtx.createMediaStreamSource(micStream);
+
+            // Buffer size: 2048 samples
+            scriptProcessor = audioCtx.createScriptProcessor(2048, 1, 1);
+
+            // Connect through a zero-gain node to prevent local mic feedback screeching
+            const silentGain = audioCtx.createGain();
+            silentGain.gain.value = 0.0;
+
+            micSource.connect(scriptProcessor);
+            scriptProcessor.connect(silentGain);
+            silentGain.connect(audioCtx.destination);
+
+            pcmAccumulationBuffer = [];
+
+            scriptProcessor.onaudioprocess = (e) => {
+                if (!isCalling || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+                const inputData = e.inputBuffer.getChannelData(0);
+
+                // Calculate RMS energy for VU meter
+                let sumSq = 0;
+                for (let i = 0; i < inputData.length; i++) {
+                    sumSq += inputData[i] * inputData[i];
+                }
+                const rms = Math.sqrt(sumSq / inputData.length);
+                const db = rms > 0.0001 ? 20 * Math.log10(rms) : -60;
+                updateVuMeter(db, rms);
+
+                // If muted, send silence or skip
+                if (isMuted) {
+                    return;
+                }
+
+                // Resample to 16 kHz
+                const resampled = resampleTo16k(inputData, audioCtx.sampleRate);
+                for (let i = 0; i < resampled.length; i++) {
+                    pcmAccumulationBuffer.push(resampled[i]);
+                }
+
+                // Emit 50ms frames (800 samples)
+                while (pcmAccumulationBuffer.length >= TARGET_FRAME_SAMPLES) {
+                    const frameSlice = pcmAccumulationBuffer.splice(0, TARGET_FRAME_SAMPLES);
+                    const pcm16 = new Int16Array(TARGET_FRAME_SAMPLES);
+                    for (let i = 0; i < TARGET_FRAME_SAMPLES; i++) {
+                        const s = Math.max(-1.0, Math.min(1.0, frameSlice[i]));
+                        pcm16[i] = Math.floor(s < 0 ? s * 32768 : s * 32767);
+                    }
+
+                    // Send raw binary PCM16 frame
+                    ws.send(pcm16.buffer);
+                    framesSent++;
+                    lblFramesSent.innerText = `${framesSent} frames`;
+                }
+            };
+        }
+
+        // Update VU Meter
+        function updateVuMeter(db, rms) {
+            const clampedDb = Math.max(-60, Math.min(0, db));
+            const pct = Math.min(100, Math.max(0, ((clampedDb + 60) / 60) * 100));
+            vuBar.style.width = `${pct}%`;
+            lblAudioDb.innerText = `${Math.round(clampedDb)} dB`;
+        }
+
+        // Handle Telemetry Received from MediaGatewayServer
+        function handleTelemetry(data) {
+            if (data.type === "ENROLLMENT_RESULT") {
+                btnEnrollVoice.disabled = false;
+                btnEnrollVoice.innerText = data.success ? "🎙️ Re-Enroll Voice as CEO" : "🎙️ Enroll Live Voice as CEO";
+                appendLog(`[BIOMETRIC ENROLLMENT] ${data.message}`, data.success ? "log-state-NORMAL" : "log-state-WARN_ANALYST");
+                alert(data.message);
+                return;
+            }
+
+            const isSilence = data.status === "SILENCE_DROPPED";
+            const risk = data.risk_score || 0.0;
+            const state = data.policy_state || data.state || (isSilence ? "NORMAL" : "NORMAL");
+            const action = data.action || (isSilence ? "ALLOW" : "ALLOW");
+            const latency = data.latency_breakdown ? data.latency_breakdown.total_ms : 0.0;
+            const evidence = data.evidence || data.reasons || (isSilence ? ["Comfort noise / Silence"] : []);
+
+            // 1. Update Risk Score
+            valRiskScore.innerText = risk.toFixed(1);
+            if (risk >= 90) valRiskScore.style.color = "#ef4444";
+            else if (risk >= 75) valRiskScore.style.color = "#f97316";
+            else if (risk >= 60) valRiskScore.style.color = "#f59e0b";
+            else if (risk >= 30) valRiskScore.style.color = "#06b6d4";
+            else valRiskScore.style.color = "#10b981";
+
+            // 2. Update Policy State Badge
+            badgePolicyState.innerText = state;
+            badgePolicyState.className = "state-pill";
+            if (state === "ACTIVE_HOLD") badgePolicyState.classList.add("state-hold");
+            else if (state === "STEP_UP_MFA") badgePolicyState.classList.add("state-mfa");
+            else if (state === "WARN_ANALYST") badgePolicyState.classList.add("state-warn");
+            else if (state === "MONITOR") badgePolicyState.classList.add("state-monitor");
+            else badgePolicyState.classList.add("state-normal");
+
+            lblPolicyAction.innerText = `Action: ${action}`;
+
+            // 3. Update Latency
+            valLatency.innerText = `${latency.toFixed(1)} ms`;
+
+            // 4. Update Biometric Similarity
+            if (data.speaker_similarity !== undefined) {
+                const pct = Math.round(data.speaker_similarity * 100);
+                const isMatch = data.speaker_match ? "MATCH" : "MISMATCH";
+                lblSpeakerMatch.innerText = `Biometric: ${pct}% (${isMatch})`;
+                lblSpeakerMatch.style.color = data.speaker_match ? "#10b981" : "#f59e0b";
+            }
+
+            // 5. Update Evidence Tags
+            evidenceTags.innerHTML = "";
+            if (evidence.length === 0) {
+                const span = document.createElement("span");
+                span.className = "evidence-tag";
+                span.innerText = "Clean voice signal &bull; No anomalies";
+                evidenceTags.appendChild(span);
+            } else {
+                evidence.forEach(item => {
+                    const span = document.createElement("span");
+                    span.className = "evidence-tag" + (risk >= 60 ? " anomaly" : "");
+                    span.innerText = item;
+                    evidenceTags.appendChild(span);
+                });
+            }
+
+            // 6. Log entry
+            const logMsg = isSilence 
+                ? `[VAD PASS] Silence dropped &bull; latency: ${latency}ms`
+                : `[${state}] Risk: ${risk.toFixed(1)} &bull; Latency: ${latency}ms &bull; ${evidence.slice(0, 2).join(", ")}`;
+            appendLog(logMsg, `log-state-${state}`);
+        }
+
+        // End Call
+        function endCall() {
+            isCalling = false;
+            if (callTimer) {
+                clearInterval(callTimer);
+                callTimer = null;
+            }
+
+            if (scriptProcessor) {
+                scriptProcessor.disconnect();
+                scriptProcessor = null;
+            }
+            if (micSource) {
+                micSource.disconnect();
+                micSource = null;
+            }
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
+            if (audioCtx) {
+                audioCtx.close().catch(() => {});
+                audioCtx = null;
+            }
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                ws.close();
+            }
+            ws = null;
+
+            callStatusBadge.className = "status-badge status-idle";
+            callStatusBadge.innerText = "DISCONNECTED";
+            btnStartCall.disabled = false;
+            btnHangup.disabled = true;
+            btnMute.disabled = true;
+            btnEnrollVoice.disabled = true;
+            btnEnrollVoice.innerText = "🎙️ Enroll Live Voice as CEO";
+            inputCallId.disabled = false;
+            vuBar.style.width = "0%";
+            lblAudioDb.innerText = "-inf dB";
+        }
+
+        // Toggle Mute
+        btnMute.addEventListener("click", () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                btnMute.classList.add("active");
+                muteLabel.innerText = "Unmute";
+                appendLog("Microphone muted.", "log-silent");
+            } else {
+                btnMute.classList.remove("active");
+                muteLabel.innerText = "Mute";
+                appendLog("Microphone unmuted.", "log-silent");
+            }
+        });
+
+        // Enroll Live Voice
+        btnEnrollVoice.addEventListener("click", () => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            btnEnrollVoice.innerText = "Capturing 2s voice profile...";
+            btnEnrollVoice.disabled = true;
+            ws.send(JSON.stringify({
+                action: "enroll_current",
+                speaker_id: "CEO_EXEC_01"
+            }));
+        });
+
+        btnStartCall.addEventListener("click", startCall);
+        btnHangup.addEventListener("click", endCall);
+        btnClearLogs.addEventListener("click", () => {
+            logTerminal.innerHTML = "";
+        });
+    </script>
+</body>
+</html>

@@ -31,6 +31,10 @@ class AudioRingBuffer:
         if not pcm_data:
             return 0
 
+        # Discard trailing odd byte if frame was fragmented or truncated
+        if len(pcm_data) % 2 != 0:
+            pcm_data = pcm_data[: len(pcm_data) - 1]
+
         # Cast byte stream to int16, then normalize to float32
         int16_samples = np.frombuffer(pcm_data, dtype=np.int16)
         if len(int16_samples) == 0:
