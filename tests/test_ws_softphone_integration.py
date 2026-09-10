@@ -2,7 +2,7 @@ import json
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
-from src.server import app, media_gateway
+from backend.server import app, media_gateway
 
 def generate_pcm16_frame(frequency_hz: float = 200.0, amplitude: float = 0.5, num_samples: int = 800) -> bytes:
     """Generates an 800-sample (50ms @ 16kHz) 16-bit PCM mono audio frame."""

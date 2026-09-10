@@ -2,7 +2,7 @@ import hmac
 import hashlib
 import json
 import pytest
-from src.policy.n8n_dispatcher import N8NDispatcher
+from backend.policy.n8n_dispatcher import N8NDispatcher
 
 def test_n8n_dispatcher_hmac_signing():
     dispatcher = N8NDispatcher(

@@ -7,8 +7,8 @@ import pytest
 import scipy.io.wavfile as wav
 import scipy.signal
 
-from src.gateway.sip_mirror_sim import SIPMirrorSimulator
-from src.inference.anti_spoofing_ensemble import (
+from backend.gateway.sip_mirror_sim import SIPMirrorSimulator
+from backend.inference.anti_spoofing_ensemble import (
     TRANSFORMERS_AVAILABLE,
     AntiSpoofingEnsemble,
     HuggingFaceSpoofDetector,

@@ -1,5 +1,5 @@
 import pytest
-from src.policy.audit_ledger import AuditLedger
+from backend.policy.audit_ledger import AuditLedger
 
 def test_audit_ledger_genesis_and_chaining():
     ledger = AuditLedger()

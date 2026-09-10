@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.inference.dsp_gate import DSPGate
+from backend.inference.dsp_gate import DSPGate
 
 def test_dsp_gate_latency_under_5ms():
     gate = DSPGate(sample_rate=16000)

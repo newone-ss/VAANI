@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.gateway.ring_buffer import AudioRingBuffer
+from backend.gateway.ring_buffer import AudioRingBuffer
 
 def test_ring_buffer_initialization():
     ring = AudioRingBuffer(sample_rate=16000, capacity_seconds=2.0)

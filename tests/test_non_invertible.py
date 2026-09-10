@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.inference.non_invertible_speaker import NonInvertibleSpeakerVerifier
+from backend.inference.non_invertible_speaker import NonInvertibleSpeakerVerifier
 
 def test_speaker_enrollment_and_verification():
     verifier = NonInvertibleSpeakerVerifier(

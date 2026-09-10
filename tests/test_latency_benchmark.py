@@ -1,13 +1,13 @@
 import time
 import numpy as np
 import pytest
-from src.gateway.ring_buffer import AudioRingBuffer
-from src.inference.dsp_gate import DSPGate
-from src.inference.anti_spoofing_ensemble import AntiSpoofingEnsemble
-from src.inference.non_invertible_speaker import NonInvertibleSpeakerVerifier
-from src.policy.policy_engine import PolicyEngine
-from src.policy.audit_ledger import AuditLedger
-from src.policy.n8n_dispatcher import N8NDispatcher
+from backend.gateway.ring_buffer import AudioRingBuffer
+from backend.inference.dsp_gate import DSPGate
+from backend.inference.anti_spoofing_ensemble import AntiSpoofingEnsemble
+from backend.inference.non_invertible_speaker import NonInvertibleSpeakerVerifier
+from backend.policy.policy_engine import PolicyEngine
+from backend.policy.audit_ledger import AuditLedger
+from backend.policy.n8n_dispatcher import N8NDispatcher
 
 def test_sub_300ms_decision_latency_sla():
     sample_rate = 16000

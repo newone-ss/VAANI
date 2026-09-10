@@ -119,8 +119,9 @@ pytest -v
 
 ### 4. Launch the Media Gateway & Console
 ```bash
-python -m uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
 ```
+*(Or alternatively run `python backend/server.py` directly).*
 
 Open your browser at **`http://localhost:8000`** to access the **BiTe_me SecOps Analyst Console**.
 
@@ -130,43 +131,63 @@ Open your browser at **`http://localhost:8000`** to access the **BiTe_me SecOps 
 
 ```
 BiTe_me/
-├── config.py                       # Global settings & risk thresholds
-├── requirements.txt                # Python dependencies
-├── .gitignore                      # Privacy & venv exclusions
-├── README.md                       # Architectural documentation
-├── src/
+├── backend/                        # Dedicated Backend Application & Engine
 │   ├── __init__.py
 │   ├── server.py                   # FastAPI server, REST & WebSocket routes
+│   ├── core/                       # Core configuration & settings
+│   │   ├── __init__.py
+│   │   └── config.py               # Canonical Pydantic settings & configuration
 │   ├── gateway/                    # Ingestion & Media Plane
 │   │   ├── __init__.py
 │   │   ├── ring_buffer.py          # Zero-disk bounded circular audio buffer
-│   │   ├── ws_server.py            # High-throughput streaming WebSocket gateway
-│   │   └── sip_mirror_sim.py       # PBX/SBC SIP trunk audio simulator
+│   │   ├── sip_mirror_sim.py       # PBX/SBC SIP trunk audio simulator
+│   │   └── ws_server.py            # High-throughput streaming WebSocket gateway
 │   ├── inference/                  # Hot Path Streaming Inference (< 60ms)
 │   │   ├── __init__.py
-│   │   ├── dsp_gate.py             # Sub-5ms DSP VAD & spectral stats gate
 │   │   ├── anti_spoofing_ensemble.py # ONNX neural vocoder artifact detector
+│   │   ├── dsp_gate.py             # Sub-5ms DSP VAD & spectral stats gate
 │   │   └── non_invertible_speaker.py # Cancelable biometric speaker verification
 │   └── policy/                     # Risk Policy & Cold Path Plane
 │       ├── __init__.py
+│       ├── audit_ledger.py         # SHA-256 hash-chained audit ledger
 │       ├── decision_smoothing.py   # Rolling window EMA & anomaly density
-│       ├── policy_engine.py        # 5-tier state machine with hysteresis
 │       ├── n8n_dispatcher.py       # Signed HMAC-SHA256 metadata webhook
-│       └── audit_ledger.py         # SHA-256 hash-chained audit ledger
-├── static/                         # SecOps Web Console
-│   ├── index.html                  # Cyber defense dashboard
-│   ├── style.css                   # Dark mode styling & visualizers
-│   └── app.js                      # Web Audio, WebSockets & canvas visualizers
-└── tests/                          # Comprehensive automated test suite
-    ├── __init__.py
-    ├── test_ring_buffer.py         # In-memory buffer test
-    ├── test_dsp_gate.py            # Sub-5ms DSP gate test
-    ├── test_anti_spoofing.py       # Neural vocoder artifact test
-    ├── test_non_invertible.py      # Mathematical non-invertibility test
-    ├── test_policy_engine.py       # Graduated tier & smoothing test
-    ├── test_audit_ledger.py        # SHA-256 chain & tamper detection test
-    ├── test_n8n_dispatcher.py      # HMAC signature test
-    └── test_latency_benchmark.py   # Sub-300ms latency SLA benchmark
+│       └── policy_engine.py        # 5-tier state machine with hysteresis
+├── frontend/                       # Dedicated Frontend Web Client & Visualizers
+│   ├── pages/                      # HTML Views & User Interfaces
+│   │   ├── index.html              # Cyber defense analyst dashboard
+│   │   └── softphone_capture.html  # Browser softphone audio capture client
+│   └── assets/                     # Static Client Resources
+│       ├── css/
+│       │   └── style.css           # Modern dark-theme styling & visualizer layout
+│       └── js/
+│           └── app.js              # Web Audio, WebSockets & canvas visualizers
+├── models/                         # Model weights and ONNX artifacts
+│   ├── .gitkeep
+│   └── gustking_wav2vec2_deepfake.onnx
+├── scripts/                        # Operational and export utilities
+│   └── export_gustking_onnx.py     # Wav2Vec2-XLSR to ONNX dynamic-axes exporter
+├── tests/                          # Comprehensive automated test suite
+│   ├── __init__.py
+│   ├── conftest.py                 # Centralized pytest fixtures & frame generators
+│   ├── fixtures/                   # Test audio WAV fixtures (genuine & cloned)
+│   │   └── *.wav
+│   ├── test_anti_spoofing.py       # Neural vocoder artifact test
+│   ├── test_audit_ledger.py        # SHA-256 chain & tamper detection test
+│   ├── test_dsp_gate.py            # Sub-5ms DSP gate test
+│   ├── test_latency_benchmark.py   # Sub-300ms latency SLA benchmark
+│   ├── test_n8n_dispatcher.py      # HMAC signature test
+│   ├── test_non_invertible.py      # Mathematical non-invertibility test
+│   ├── test_policy_engine.py       # Graduated tier & smoothing test
+│   ├── test_ring_buffer.py         # In-memory buffer test
+│   └── test_ws_softphone_integration.py # Live browser softphone WebSocket integration
+├── src/                            # Backward-compatibility proxy layer
+├── .env.example                    # Environment variable template
+├── .gitignore                      # Git exclusion rules & test fixture whitelist
+├── pyproject.toml                  # PEP 517/518 build metadata, ruff & pytest config
+├── requirements.txt                # Python dependencies
+├── config.py                       # Backward-compatible configuration shim
+└── README.md                       # Architectural documentation
 ```
 
 ---

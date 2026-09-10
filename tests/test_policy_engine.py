@@ -1,5 +1,5 @@
 import pytest
-from src.policy.policy_engine import PolicyEngine, PolicyState, PolicyAction
+from backend.policy.policy_engine import PolicyEngine, PolicyState, PolicyAction
 
 def test_policy_engine_escalation_tiers():
     engine = PolicyEngine(

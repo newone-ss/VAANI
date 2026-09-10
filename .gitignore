@@ -46,6 +46,7 @@ share/python-wheels/
 *.ogg
 recordings/
 temp_audio/
+!tests/fixtures/*.wav
 
 # Model checkpoints & large binary weights (>100MB)
 *.onnx
