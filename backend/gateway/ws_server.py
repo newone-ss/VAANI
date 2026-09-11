@@ -5,8 +5,19 @@ from typing import Dict, Optional, Set
 import numpy as np
 from fastapi import WebSocket, WebSocketDisconnect
 
+import os
+import sys
+
+# Ensure workspace root is in sys.path when running file or module directly
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
+
 from backend.core.config import config
-from .ring_buffer import AudioRingBuffer
+try:
+    from backend.gateway.ring_buffer import AudioRingBuffer
+except (ImportError, ValueError):
+    from .ring_buffer import AudioRingBuffer
 from backend.inference.dsp_gate import DSPGate, DSPResult
 from backend.inference.anti_spoofing_ensemble import AntiSpoofingEnsemble
 from backend.inference.non_invertible_speaker import NonInvertibleSpeakerVerifier

@@ -6,6 +6,11 @@ env/
 env.bak/
 venv.bak/
 
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
