@@ -5,7 +5,7 @@
 [![Audit Ledger](https://img.shields.io/badge/Audit_Ledger-SHA--256_Hash--Chained-purple)](https://github.com/newone-ss/BiTe_me)
 [![Speaker Biometrics](https://img.shields.io/badge/Biometrics-Non--Invertible_Templates-orange)](https://github.com/newone-ss/BiTe_me)
 
-**BiTe_me** is an ultra-low-latency, event-driven voice security engine designed to detect AI-generated synthetic speech (deepfakes), neural vocoder artifacts, and replay attacks during live executive telephone calls. 
+**VAANI** is an ultra-low-latency, event-driven voice security engine designed to detect AI-generated synthetic speech (deepfakes), neural vocoder artifacts, and replay attacks during live executive telephone calls. 
 
 Rather than merely flagging suspicious audio post-mortem, **BiTe_me** computes a dynamic, rolling risk score in real time and triggers **graduated enterprise controls** (analyst alerts, out-of-band step-up MFA to the CEO's registered hardware device, or SIP trunk call holds) *before* a fraudulent financial approval or privileged action can be executed.
 
