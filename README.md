@@ -1,4 +1,4 @@
-# BiTe_me: AI-Powered Real-Time Voice Impersonation Detection Engine
+# VAANI - real-time voice integrity platform that detects AI-generated
 
 [![Decision Latency](https://img.shields.io/badge/Latency_SLA-%3C_300ms-brightgreen)](https://github.com/newone-ss/BiTe_me)
 [![Privacy Mode](https://img.shields.io/badge/Privacy-Zero--Disk_RAM-blue)](https://github.com/newone-ss/BiTe_me)
